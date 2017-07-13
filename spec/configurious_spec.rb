@@ -5,7 +5,15 @@ RSpec.describe Configurious do
     expect(Configurious::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(true)
+  it "can transform a file" do
+    result = Configurious.transform('spec/fixtures/tconfig.yml') do
+      replace 'hashish', with: {'b': 'B'}
+    end
+
+    expect(result).to eq(<<EXPECTED)
+---
+hashish:
+  b: B
+EXPECTED
   end
 end
