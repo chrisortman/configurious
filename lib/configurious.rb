@@ -1,6 +1,8 @@
-require "configurious/version"
 require 'yaml'
-require 'configurious/operations'
+require 'commander'
+
+require "configurious/version"
+require "configurious/transformer"
 
 module Configurious
   # Your code goes here...
@@ -12,51 +14,37 @@ module Configurious
     contents.to_yaml
   end
 
-  class Transformer
-    
-    def initialize
-      @steps = []
-    end
+  class CLI
 
-    def add(key, value)
-      op = Configurious::Operations::Add.new
-      op.key = key
-      op.content = value
-      @steps << op
-    end
+    include Commander::Methods
+    # include whatever modules you need
 
-    def replace(key, with:)
-      r = Configurious::Operations::Replace.new
-      r.key = key
-      r.content = with
-      @steps << r
-    end
+    def run
+      program :name, 'configurious'
+      program :version, '0.0.1'
+      program :description, 'Allows scripting of changes to yaml files'
 
-    def update(key, &block)
-      r = Configurious::Operations::Update.new
-      r.key = key
-      r.applies(&block)
-      @steps << r
-    end
+      command :apply do |c|
+        c.syntax = 'configurious apply [options]'
+        c.summary = ''
+        c.description = ''
+        c.example 'description', 'command example'
+        c.action do |args, options|
+          puts "APPLYING"
 
-    def remove(key)
-      r = Configurious::Operations::Remove.new
-      r.key = key
-      @steps << r
-    end
+          # Do something or c.when_called Configurious::Commands::Apply
+          tfile = args.first
+          ifile = args[1]
 
-    def change_key(key, to:)
-      r = Configurious::Operations::ChangeKey.new
-      r.key = key
-      r.content = to
-      @steps << r
-    end
-
-    def apply(content)
-      @steps.each do |t|
-        t.apply(content)
+          transformer = Configurious::Transformer.new
+          transformer.instance_eval File.read(tfile)
+          result = transformer.apply ifile
+          puts result
+        end
       end
-      content
+
+      run!
     end
   end
+
 end
