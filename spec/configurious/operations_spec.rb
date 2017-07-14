@@ -1,6 +1,26 @@
 require "spec_helper"
 
 RSpec.describe 'Operations' do
+  describe 'Node selection' do
+    it 'should select the node that contains the last key' do
+      content = {
+        'a' => {
+          'b' => {
+            'c' => {
+              'd' => 'THIS'
+            }
+          }
+        }
+      }
+
+      op = Configurious::Operations::OperationBase.new
+      op.path = 'a.b.c.d'
+      key,dict = op.select_node(content)
+
+      expect(key).to eq('d')
+      expect(dict).to eq(content['a']['b']['c'])
+    end
+  end
   describe 'Replace' do
 
     subject { Configurious::Operations::Replace.new }

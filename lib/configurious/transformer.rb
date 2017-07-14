@@ -15,9 +15,10 @@ module Configurious
       @steps << op
     end
 
-    def replace(path, with:)
+    def replace(path, with:, part: nil)
       r = Configurious::Operations::Replace.new
       r.path = path
+      r.part = part
       r.content = with
       @steps << r
     end

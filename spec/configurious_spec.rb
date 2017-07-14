@@ -13,6 +13,7 @@ update('vowels') do
   remove 'a'
   change_key 'o', to: 'Y'
 end
+replace 'words.happy', part: 'sad', with: 'happy'
 SCRIPT
     result = Configurious.apply('spec/fixtures/tconfig.yml', script)
     expect(result).to eq(<<EXPECTED)
@@ -22,6 +23,8 @@ hashish:
 vowels:
   i: I
   Y: O
+words:
+  happy: A happy place
 EXPECTED
   end
 end

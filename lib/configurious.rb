@@ -27,7 +27,7 @@ module Configurious
 
     def run
       program :name, 'configurious'
-      program :version, '0.0.1'
+      program :version, Configurious::VERSION
       program :description, 'Allows scripting of changes to yaml files'
 
       command :poop do |c|
@@ -45,9 +45,7 @@ module Configurious
         c.description = ''
         c.example 'description', 'command example'
         c.action do |args, options|
-          puts "APPLYING"
 
-          # Do something or c.when_called Configurious::Commands::Apply
           tfile, ifile = args
           result = Configurious.apply(ifile,File.read(tfile))
           puts result
