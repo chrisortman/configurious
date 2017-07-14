@@ -40,7 +40,13 @@ RSpec.describe 'Operations' do
       expect(content).to include({'top' => {'a' => 'A awesome word'}})
 
     end
-    it 'raises an error if the key does not exist'
+    it 'raises an error if the key does not exist' do
+
+      content = {'a' => 'A nasty word'}
+      subject.path = 'b'
+      subject.content = 'nada'
+      expect { subject.apply content }.to raise_error("Cannot replace key 'b' because it does not already exist")
+    end
   end
 
   describe 'Add' do

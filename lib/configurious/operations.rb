@@ -56,6 +56,8 @@ module Configurious
       attr_accessor :part
 
       def do_operation(dict, key)
+
+        raise "Cannot replace key '#{key}' because it does not already exist" unless dict.has_key?(key)
         if @part
           old = dict[key]
           dict[key] = old.gsub(@part,@content)
