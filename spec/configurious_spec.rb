@@ -6,15 +6,15 @@ RSpec.describe Configurious do
   end
 
   it "can transform a file" do
-    result = Configurious.transform('spec/fixtures/tconfig.yml') do |t|
-      t.replace 'hashish', with: {'b': 'B'}
-      t.update('vowels') do |v|
-        v.add 'i', 'I'
-        v.remove 'a'
-        v.change_key 'o', to: 'Y'
-      end
-    end
-
+    script = <<SCRIPT
+replace 'hashish', with: {'b': 'B'}
+update('vowels') do
+  add 'i', 'I'
+  remove 'a'
+  change_key 'o', to: 'Y'
+end
+SCRIPT
+    result = Configurious.apply('spec/fixtures/tconfig.yml', script)
     expect(result).to eq(<<EXPECTED)
 ---
 hashish:

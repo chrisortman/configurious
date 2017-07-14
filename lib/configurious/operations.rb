@@ -5,10 +5,10 @@ module Configurious
   module Operations
     class OperationBase
 
-      attr_accessor :key, :content
+      attr_accessor :path, :content
 
-      def simple_key?
-        !@key.include?('.')
+      def simple_path?
+        !@path.include?('.')
       end
 
       def normalize_content!
@@ -17,63 +17,96 @@ module Configurious
         end
       end
 
+      # Handles retrieving the content
+      # we really want to update from the
+      # content that is passed in
+      #
+      # It's expected that the outer most
+      # node comes in and then we need to
+      # look at our key and if we have a
+      # path we need to traverse it
+      def select_node(dict)
+        if simple_path?
+          [path, dict]
+        else
+          parts = path.split('.')
+          piece = dict
+          parts[0..-2].each{ |key| piece = dict[key] }
+          [parts.last, piece]
+        end
+
+      end
+
+      def apply(existing_content)
+        self.normalize_content!
+        key, dict = select_node(existing_content)
+        do_operation(dict, key)
+      end
+
+      # Performs the actual transform
+      # Is given the dictionary to transform
+      # and the key that should be transformed
+      def do_operation(dict, key)
+
+      end
     end
 
     class Replace < OperationBase
 
+      attr_accessor :part
 
-      def apply(content)
-
-        self.normalize_content!
-
-        if simple_key?
-          content[@key] = @content
+      def do_operation(dict, key)
+        if @part
+          old = dict[key]
+          dict[key] = old.gsub(@part,@content)
         else
-          parts = @key.split('.')
-
-          piece = nil
-          parts[0..-2].each{ |key| piece = content[key] }
-          piece[parts.last] = @content
+          dict[key] = @content
         end
       end
-
 
     end
 
     class Add < OperationBase
 
-      def apply(content)
+      def do_operation(dict, key)
 
-        self.normalize_content!
-        raise "Cannot add element, key already exists: #{@key}" if content.has_key?(@key)
+        raise "Cannot add element, key already exists: #{key}" if dict.has_key?(key)
 
-        content[@key] = @content
+        dict[key] = self.content
       end
     end
 
     class Update < OperationBase
 
-      def applies
+      def applies(&block)
         @transform = Configurious::Transformer.new
-        yield @transform
+        case block.arity
+        when 0
+          @transform.instance_eval(&block)
+        else
+          yield @transform
+        end
       end
 
-      def apply(content)
-        child = content[@key]
-        @transform.apply(child)
+      def do_operation(dict, key)
+        @transform.apply(dict[key])
       end
+
     end
 
     class Remove < OperationBase
-      def apply(content)
-        content.delete(@key)
+
+      def do_operation(dict, key)
+        dict.delete(key)
       end
+
     end
 
     class ChangeKey < OperationBase
-      def apply(content)
-        v = content.delete(@key)
-        content[@content] = v
+
+      def do_operation(dict, key)
+        v = dict.delete(key)
+        dict[content] = v
       end
     end
   end

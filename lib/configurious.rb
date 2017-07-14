@@ -14,6 +14,12 @@ module Configurious
     contents.to_yaml
   end
 
+  def self.apply(ifile, script)
+    Configurious.transform(ifile) do |t|
+      t.instance_eval script
+    end
+  end
+
   class CLI
 
     include Commander::Methods
@@ -24,6 +30,15 @@ module Configurious
       program :version, '0.0.1'
       program :description, 'Allows scripting of changes to yaml files'
 
+      command :poop do |c|
+        c.syntax = "configurious poop"
+        c.summary = "It's poopy"
+        c.action do |args, options|
+          puts "I have #{args.inspect}"
+
+        end
+      end
+
       command :apply do |c|
         c.syntax = 'configurious apply [options]'
         c.summary = ''
@@ -33,12 +48,8 @@ module Configurious
           puts "APPLYING"
 
           # Do something or c.when_called Configurious::Commands::Apply
-          tfile = args.first
-          ifile = args[1]
-
-          transformer = Configurious::Transformer.new
-          transformer.instance_eval File.read(tfile)
-          result = transformer.apply ifile
+          tfile, ifile = args
+          result = Configurious.apply(ifile,File.read(tfile))
           puts result
         end
       end

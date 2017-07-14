@@ -3,5 +3,4 @@
 require 'rubygems'
 require "configurious"
 
-puts "I AM GROOT"
 Configurious::CLI.new.run
